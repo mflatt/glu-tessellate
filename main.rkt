@@ -26,12 +26,16 @@
 (define GLU_TESS_COMBINE 100105)
 (define GLU_TESS_ERROR   100103)
 
+(define GLU_TESS_WINDING_RULE   100140)
 (define GLU_TESS_BOUNDARY_ONLY  100141)
 
 (define GL_LINE_LOOP        #x0002)
 (define GL_TRIANGLES        #x0004)
 (define GL_TRIANGLE_STRIP   #x0005)
 (define GL_TRIANGLE_FAN     #x0006)
+
+(define GLU_TESS_WINDING_ODD      100130)
+(define GLU_TESS_WINDING_NONZERO  100131)
 
 (define-glu gluDeleteTess (_fun _GLUtessellator-pointer -> _void)
   #:wrap (deallocator))
@@ -68,6 +72,7 @@
 (define-glu gluEndPolygon (_fun _GLUtessellator-pointer -> _void))
 
 (define (paths->tessellation closed-paths
+                             #:fill-style fill-style
                              #:expected-scale scale
                              #:triangles? triangles?)
 
@@ -119,10 +124,16 @@
   (gluTessCallback-VERTEX t tess-vertex)
   (gluTessCallback-COMBINE t tess-combine)
   (gluTessCallback-ERROR t tess-error)
-  
+
+  (gluTessNormal t 0.0 0.0 1.0)
+
   (gluTessProperty t GLU_TESS_BOUNDARY_ONLY (if triangles?
                                                 0.0
                                                 1.0))
+  (gluTessProperty t GLU_TESS_WINDING_RULE
+                   (->i (if (eq? fill-style 'odd-even)
+                            GLU_TESS_WINDING_ODD
+                            GLU_TESS_WINDING_NONZERO)))
   
   (gluTessBeginPolygon t #f)
   (for ([closed-path (in-list closed-paths)])
@@ -215,13 +226,17 @@
       [else (error "unknown mode")]))))
 
 (define (paths->triangles closed-paths
+                          #:fill-style [fill-style 'odd-even]
                           #:expected-scale [expected-scale 1.0])
   (paths->tessellation closed-paths
+                       #:fill-style fill-style
                        #:expected-scale expected-scale
                        #:triangles? #t))
 
 (define (paths->edges closed-paths
+                      #:fill-style [fill-style 'odd-even]
                       #:expected-scale [expected-scale 1.0])
   (paths->tessellation closed-paths
+                       #:fill-style fill-style
                        #:expected-scale expected-scale
                        #:triangles? #f))

@@ -12,13 +12,15 @@ either a set of triangles for the bounded shape's interior or a set of
 line segments for the bounded shape's edges.}
 
 @defproc[(paths->triangles [closed-paths (listof (listof vector?))]
+                           [#:fill-style fill-style (or/c 'odd-even 'winding)]
                            [#:expected-scale expected-scale real? 1.0])
          (listof (vector/c (cons/c flonum? flonum?)
                            (cons/c flonum? flonum?)
                            (cons/c flonum? flonum?)))]{
 
 Produces a set of triangles given a set of closed paths. The triangles
-cover the space bounded by the combined paths.
+cover the space bounded by the combined paths using the specified
+@racket[fill-style].
 
 Each closed path must start with a vector of two numbers, which
 represents the path's starting and ending point. Subsequent elements
@@ -37,6 +39,7 @@ on how much the resulting triangles are expected to be scaled relative
 to a rendering unit.}
 
 @defproc[(paths->edges [closed-paths (listof (listof vector?))]
+                       [#:fill-style fill-style (or/c 'odd-even 'winding)]
                        [#:expected-scale expected-scale real? 1.0])
          (listof (vector/c (cons/c flonum? flonum?)
                            (cons/c flonum? flonum?)))]{
